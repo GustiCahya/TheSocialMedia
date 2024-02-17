@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.gusticahya.thesocialmedia.database.SQLiteHelper
 
 data class ListItem(val id: Int, val title: String, val type: String) // "Friend" or "Group"
 
@@ -49,7 +50,6 @@ fun getSampleListItems(): List<ListItem> {
         ListItem(2, "Bob", "Friend"),
         ListItem(3, "Charlie", "Friend"),
         ListItem(4, "Delta Group", "Group"),
-        ListItem(5, "Echo Group", "Group")
-        // Add more items as needed
+        ListItem(5, "Echo Group", "Group"),
     )
 }

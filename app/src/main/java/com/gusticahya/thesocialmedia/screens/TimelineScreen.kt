@@ -16,15 +16,16 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.gusticahya.thesocialmedia.database.SQLiteHelper
 
 // Mock data class for a tweet
 data class Tweet(
     val id: Int,
     val author: String,
     val content: String,
-    var likes: Int,
-    var comments: Int,
-    var shares: Int
+    var likes: Int = 0,
+    var comments: Int = 0,
+    var shares: Int = 0
 )
 
 // Example function to get a list of tweets
@@ -36,19 +37,39 @@ fun getMockTweets(): List<Tweet> {
     )
 }
 
+// Function to fetch posts from the database
+fun getPostsFromDatabase(dbHelper: SQLiteHelper): List<SQLiteHelper.Post> {
+    val postsFromDb = dbHelper.getAllPosts()
+    val posts = mutableListOf<SQLiteHelper.Post>()
+
+    // Fetch username for each post's author
+    for (post in postsFromDb) {
+        val user = dbHelper.getUserInfo(post.userId)
+        val authorName = user?.username
+        if (authorName != null) {
+            val postItem = SQLiteHelper.Post(post.id, post.userId, post.content, authorName)
+            posts.add(postItem)
+        }
+    }
+
+    println(posts)
+    return posts
+}
+
+
 @Composable
-fun TimelineScreen(navController: NavHostController, innerPadding: PaddingValues) {
-    val tweets = remember { mutableStateOf(getMockTweets()) }
+fun TimelineScreen(navController: NavHostController, innerPadding: PaddingValues, dbHelper: SQLiteHelper) {
+    val posts = remember { mutableStateOf(getPostsFromDatabase(dbHelper)) }
 
     Column(modifier = Modifier.padding(innerPadding)) {
-        tweets.value.forEach { tweet ->
+        posts.value.forEach { tweet ->
             TweetCard(tweet)
         }
     }
 }
 
 @Composable
-fun TweetCard(tweet: Tweet) {
+fun TweetCard(post: SQLiteHelper.Post) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,17 +77,17 @@ fun TweetCard(tweet: Tweet) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = tweet.author, style = MaterialTheme.typography.labelLarge)
+            Text(text = post.username, style = MaterialTheme.typography.labelLarge)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = tweet.content)
+            Text(text = post.content)
             Spacer(modifier = Modifier.height(8.dp))
-            TweetActions(tweet)
+            TweetActions(post)
         }
     }
 }
 
 @Composable
-fun TweetActions(tweet: Tweet) {
+fun TweetActions(post: SQLiteHelper.Post) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -76,24 +97,24 @@ fun TweetActions(tweet: Tweet) {
         // Like button
         ActionButton(
             icon = Icons.Default.Favorite,
-            text = "${tweet.likes}",
-            onClick = { tweet.likes++ },
+            text = "",
+            onClick = {},
             description = "Like"
         )
 
         // Comment button
         ActionButton(
             icon = Icons.Default.Send,
-            text = "${tweet.comments}",
-            onClick = { tweet.comments++ },
+            text = "",
+            onClick = {},
             description = "Comment"
         )
 
         // Share button
         ActionButton(
             icon = Icons.Default.Share,
-            text = "${tweet.shares}",
-            onClick = { tweet.shares++ },
+            text = "",
+            onClick = {},
             description = "Share"
         )
     }

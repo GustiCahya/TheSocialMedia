@@ -1,8 +1,10 @@
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.gusticahya.thesocialmedia.database.SQLiteHelper
@@ -35,10 +37,13 @@ fun RegisterScreen(navController: NavHostController, dbHelper: SQLiteHelper) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
-            // Insert user data into the database
-            dbHelper.addUser(username.value, password.value)
-            // Navigate to home screen after registration
-            navController.navigate("home")
+            dbHelper.addUser(username.value, password.value) {
+                // Callback function to set user ID in UserCache after successful registration
+                val isValidUser = dbHelper.loginUser(username.value, password.value)
+                if (isValidUser) {
+                    navController.navigate("login")
+                }
+            }
         }) {
             Text("Register")
         }
