@@ -1,5 +1,3 @@
-package com.gusticahya.thesocialmedia.screens
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -7,18 +5,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.gusticahya.thesocialmedia.database.SQLiteHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(navController: NavHostController) {
-    // You can replicate the structure of LoginScreen and modify it for registration purposes
+fun RegisterScreen(navController: NavHostController, dbHelper: SQLiteHelper) {
+    // States for registration fields
     val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
-    // Additional states for registration, e.g., email, confirm password, etc.
 
     Column(
         modifier = Modifier
-            .padding(top = 65.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)  // Increased top padding
+            .padding(top = 65.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -36,7 +34,12 @@ fun RegisterScreen(navController: NavHostController) {
             label = { Text("Password") }
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { navController.navigate("home") }) {
+        Button(onClick = {
+            // Insert user data into the database
+            dbHelper.addUser(username.value, password.value)
+            // Navigate to home screen after registration
+            navController.navigate("home")
+        }) {
             Text("Register")
         }
         TextButton(onClick = { navController.navigate("login") }) {

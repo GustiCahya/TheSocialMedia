@@ -1,12 +1,12 @@
 package com.gusticahya.thesocialmedia
 
+import RegisterScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,18 +18,29 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ExitToApp
-import android.util.Log
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.gusticahya.thesocialmedia.database.SQLiteHelper
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var dbHelper: SQLiteHelper
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             TheSocialMediaTheme {
+
                 val navController = rememberNavController()
+                val dbHelper = SQLiteHelper(this) // Initialize SQLiteHelper
+
+                // Pass dbHelper to Screen
+                RegisterScreen(navController = navController, dbHelper = dbHelper)
+                LoginScreen(navController = navController, dbHelper = dbHelper )
+
                 val showBottomBar = remember { mutableStateOf(true) }
                 val currentRoute = remember { mutableStateOf(navController.currentDestination?.route) }
 
@@ -50,8 +61,8 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { innerPadding ->
                     NavHost(navController = navController, startDestination = "login") {
-                        composable("login") { LoginScreen(navController) }
-                        composable("register") { RegisterScreen(navController) }
+                        composable("login") { LoginScreen(navController, dbHelper) }
+                        composable("register") { RegisterScreen(navController, dbHelper) }
                         composable("home") { HomeScreen(navController, innerPadding) }
                         composable("directMessage/{userName}/{type}") { backStackEntry ->
                             DirectMessageScreen(innerPadding, userName = backStackEntry.arguments?.getString("userName") ?: "Unknown", isGroup = backStackEntry.arguments?.getString("type") == "Group")
@@ -133,7 +144,13 @@ private fun navigateToScreen(navController: NavHostController, route: String) {
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    TheSocialMediaTheme {
-        LoginScreen(navController = rememberNavController())
+    val context = LocalContext.current
+    val dbHelper = remember { SQLiteHelper(context) }
+
+    CompositionLocalProvider(LocalContext provides context) {
+        TheSocialMediaTheme {
+            LoginScreen(navController = rememberNavController(), dbHelper = dbHelper)
+        }
     }
 }
+
