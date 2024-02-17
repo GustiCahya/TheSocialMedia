@@ -16,18 +16,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.gusticahya.thesocialmedia.database.SQLiteHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(navController: NavHostController, dbHelper: SQLiteHelper) {
     val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
+    val errorMessage = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
-            .padding(top = 65.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)  // Increased top padding
+            .padding(top = 65.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -42,10 +46,21 @@ fun LoginScreen(navController: NavHostController) {
         OutlinedTextField(
             value = password.value,
             onValueChange = { password.value = it },
-            label = { Text("Password") }
+            label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation() // To hide the password
         )
+        if (errorMessage.value.isNotEmpty()) {
+            Text(errorMessage.value)
+        }
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { navController.navigate("home") }) {
+        Button(onClick = {
+            val isValidUser = dbHelper.loginUser(username.value, password.value)
+            if (isValidUser) {
+                navController.navigate("home")
+            } else {
+                errorMessage.value = "Invalid username or password"
+            }
+        }) {
             Text("Login")
         }
         TextButton(onClick = { navController.navigate("register") }) {
@@ -53,4 +68,6 @@ fun LoginScreen(navController: NavHostController) {
         }
     }
 }
+
+
 
