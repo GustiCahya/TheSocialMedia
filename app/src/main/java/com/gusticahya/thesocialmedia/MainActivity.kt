@@ -20,8 +20,10 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.gusticahya.thesocialmedia.database.SQLiteHelper
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -67,9 +69,9 @@ class MainActivity : ComponentActivity() {
                         composable("directMessage/{userName}/{type}") { backStackEntry ->
                             DirectMessageScreen(innerPadding, userName = backStackEntry.arguments?.getString("userName") ?: "Unknown", isGroup = backStackEntry.arguments?.getString("type") == "Group")
                         }
-                        composable("timeline") { TimelineScreen(navController, innerPadding) }  // Add this line
-                        composable("post") { PostScreen(innerPadding) }
-                        composable("profile") { ProfileScreen(innerPadding) }
+                        composable("timeline") { TimelineScreen(navController, innerPadding, dbHelper) }  // Add this line
+                        composable("post") { PostScreen(innerPadding, dbHelper) }
+                        composable("profile") { ProfileScreen(navController,innerPadding, dbHelper) }
                     }
                 }
             }
